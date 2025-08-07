@@ -1,0 +1,5 @@
+{
+    "max_clients": 5,
+    "logging": true,
+    "port": 5000
+  }

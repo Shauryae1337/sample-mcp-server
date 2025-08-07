@@ -1,7 +1,22 @@
 import socket
+import json
+import os
 
-HOST = '127.0.0.1'  # Localhost
-PORT = 5000         # Arbitrary non-privileged port
+CONFIG_FOLDER = 'config'
+
+def load_config():
+    config = {}
+    for file in os.listdir(CONFIG_FOLDER):
+        if file.endswith(".json"):
+            with open(os.path.join(CONFIG_FOLDER, file), 'r') as f:
+                data = json.load(f)
+                config.update(data)
+    return config
+
+HOST = '127.0.0.1'
+PORT = 5000
+
+config_data = load_config()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -14,5 +29,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             data = conn.recv(1024)
             if not data:
                 break
-            print(f"Received: {data.decode()}")
-            conn.sendall(b'ACK')
+            key = data.decode().strip()
+            print(f"Received request: {key}")
+            response = config_data.get(key, "Key not found")
+            conn.sendall(str(response).encode())
